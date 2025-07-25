@@ -1,7 +1,5 @@
 import { Module } from '../types';
 
-import { Module } from '../types';
-
 export const defaultModules: Module[] = [
   {
     id: 1,
