@@ -1,0 +1,33 @@
+<svg width="200" height="100" viewBox="0 0 200 100"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4A90A4;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#2E5266;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#A8D8EA;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#79A3B1;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+
+    <!-- Background -->
+    <rect width="200" height="100" fill="url(#bgGradient)" rx="8"/>
+
+    <!-- Lightning bolt with speed lines -->
+    <g transform="translate(20, 20)">
+        <!-- Speed lines -->
+        <rect x="0" y="25" width="12" height="3" fill="url(#logoGradient)" rx="1.5"/>
+        <rect x="0" y="32" width="8" height="2" fill="url(#logoGradient)" rx="1"/>
+        <rect x="0" y="37" width="10" height="2" fill="url(#logoGradient)" rx="1"/>
+        <rect x="0" y="42" width="6" height="2" fill="url(#logoGradient)" rx="1"/>
+
+        <!-- Lightning bolt -->
+        <path d="M15 10 L25 30 L20 30 L30 50 L20 30 L25 30 L15 10 Z" fill="url(#logoGradient)"/>
+    </g>
+
+    <!-- Text -->
+    <text x="60" y="35" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#logoGradient)">EASY</text>
+    <text x="60" y="55" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#logoGradient)">WAY</text>
+    <text x="60" y="75" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="url(#logoGradient)">A1</text>
+</svg>
