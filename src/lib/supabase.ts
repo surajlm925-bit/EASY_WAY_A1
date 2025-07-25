@@ -141,4 +141,39 @@ export const authHelpers = {
     
     return { data, error };
   },
+
+  // Helper function to ensure user profile exists
+  async ensureUserProfile(user: any) {
+    if (!user) return null;
+
+    // Check if profile exists
+    const { data: existingProfile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (existingProfile) {
+      return existingProfile;
+    }
+
+    // Create profile if it doesn't exist
+    const { data: newProfile, error } = await supabase
+      .from('user_profiles')
+      .insert([{
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || '',
+        role: 'user'
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return null;
+    }
+
+    return newProfile;
+  },
 };

@@ -129,9 +129,9 @@ modules (
    Create `.env` file in the root directory:
 
    ```env
-   VITE_API_BASE_URL=http://localhost:3001
     VITE_SUPABASE_URL=your_supabase_project_url
     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    VITE_API_BASE_URL=http://localhost:3001
    ```
 
    Create `backend/.env` file:
@@ -142,7 +142,24 @@ modules (
     SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    ```
 
-6. **Start the application**
+6. **Database Setup**
+
+   Run the database migrations in your Supabase dashboard:
+   
+   a. Go to your Supabase project dashboard
+   b. Navigate to the SQL Editor
+   c. Copy and run the SQL from `supabase/migrations/create_auth_tables.sql`
+   d. Copy and run the SQL from `supabase/migrations/setup_permissions.sql`
+
+7. **Create Your First Admin User**
+   
+   After setting up the database:
+   a. Register a new account through the application
+   b. In Supabase SQL Editor, run:
+   ```sql
+   UPDATE user_profiles SET role = 'admin' WHERE email = 'your-email@example.com';
+   ```
+8. **Start the application**
 
    **Backend** (Terminal 1):
 
@@ -157,16 +174,11 @@ modules (
    npm run dev
    ```
 
-7. **Access the application**
+9. **Access the application**
    - Frontend: <http://localhost:5173>
    - Backend API: <http://localhost:3001>
 
-8. **Create Admin User**
-   
-   After registering your first user, you can promote them to admin by running this SQL in Supabase:
-   ```sql
-   UPDATE user_profiles SET role = 'admin' WHERE email = 'your-email@example.com';
-   ```
+   **Note**: You'll be redirected to login page. After authentication, you'll have access to all features.
 
 ## 🔧 Usage
 
