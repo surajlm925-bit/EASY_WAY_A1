@@ -121,9 +121,9 @@ export default function Sidebar({
       )}
 
       {/* Modules List */}
-      <div className="flex-1 overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-shrink-0 p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900">{t('processingModules')}</h3>
             {isAdminMode && (
               <button
@@ -136,8 +136,10 @@ export default function Sidebar({
               </button>
             )}
           </div>
+        </div>
 
-          <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-2">
             {isLoading ? (
               <LoadingSpinner
                 size="md"
@@ -178,7 +180,7 @@ export default function Sidebar({
                     {isAdminMode && (
                       <div className="flex items-center space-x-1 ml-2">
                         <button
-                          onClick={(e) => {
+                          onClick={(e: { stopPropagation: () => void; }) => {
                             e.stopPropagation();
                             if (!moduleOperationLoading) {
                               onEditModule(module);

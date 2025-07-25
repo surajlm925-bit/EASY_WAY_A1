@@ -27,7 +27,7 @@ const translations = {
   downloaded: { en: 'Downloaded!', kn: 'ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ!' },
   download: { en: 'Download', kn: 'ಡೌನ್‌ಲೋಡ್' },
   processingAI: { en: 'Processing with AI...', kn: 'AI ನೊಂದಿಗೆ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ...' },
-  mayTakeMoments: { en: 'This may take a few moments', kn: 'ಇದಕ್ಕೆ ಕೆಲವು ಕ್ಷಣಗಳು লাগಬಹುದು' },
+  mayTakeMoments: { en: 'This may take a few moments', kn: 'ಇದಕ್ಕೆ ಕೆಲವು ಕ್ಷಣಗಳು লাগಬಹুদು' },
   processingError: { en: 'Processing Error', kn: 'ಪ್ರಕ್ರಿಯೆ ದೋಷ' },
   outputWillAppear: { en: 'Output will appear here after processing', kn: 'ಪ್ರಕ್ರಿಯೆಯ ನಂತರ ಔಟ್ಪುಟ್ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ' },
 };
@@ -89,57 +89,60 @@ export default function MainContent({
   const content = selectedModule[language];
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
+    <div className="flex-1 flex flex-col bg-white overflow-hidden">
       {/* Module Info */}
-      <div className="border-b border-gray-200 p-6">
+      <div className="flex-shrink-0 border-b border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900">{content.name}</h2>
         <p className="text-gray-600 mt-1">{content.description}</p>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Input Section */}
-        <div className="flex-1 flex flex-col border-r border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-2">{t('input')}</h3>
-            <div className="space-y-4">
+        <div className="flex-1 flex flex-col border-r border-gray-200 overflow-hidden">
+          <div className="flex-shrink-0 p-6 border-b border-gray-200">
+            <h3 className="font-semibold text-gray-900">{t('input')}</h3>
+          </div>
+
+          <div className="flex-1 p-6 flex flex-col overflow-hidden">
+            <div className="flex-1 mb-4 overflow-hidden">
               <textarea
                 value={input}
                 onChange={(e) => onInputChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={content.inputPlaceholder}
-                className="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent overflow-y-auto"
               />
-              
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">
-                  {t('processHint')}
-                </p>
-                <button
-                  onClick={onProcess}
-                  disabled={isLoading || !input.trim()}
-                  className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>{t('processing')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>{t('process')}</span>
-                    </>
-                  )}
-                </button>
-              </div>
+            </div>
+
+            <div className="flex-shrink-0 flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                {t('processHint')}
+              </p>
+              <button
+                onClick={onProcess}
+                disabled={isLoading || !input.trim()}
+                className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{t('processing')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>{t('process')}</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
 
         {/* Output Section */}
-        <div className="flex-1 flex flex-col">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-2">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-shrink-0 p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">{t('output')}</h3>
               {output && (
                 <div className="flex items-center space-x-2">
@@ -168,10 +171,12 @@ export default function MainContent({
                 </div>
               )}
             </div>
-            
-            <div className="min-h-64 bg-gray-50 rounded-lg p-4 border border-gray-200">
+          </div>
+
+          <div className="flex-1 p-6 overflow-hidden">
+            <div className="h-full bg-gray-50 rounded-lg border border-gray-200 flex flex-col overflow-hidden">
               {isLoading ? (
-                <div className="flex items-center justify-center h-64">
+                <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-3" />
                     <p className="text-gray-600">{t('processingAI')}</p>
@@ -179,19 +184,23 @@ export default function MainContent({
                   </div>
                 </div>
               ) : error ? (
-                <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-4 rounded-lg">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">{t('processingError')}</p>
-                    <p className="text-sm mt-1">{error}</p>
+                <div className="p-4">
+                  <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-4 rounded-lg">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium">{t('processingError')}</p>
+                      <p className="text-sm mt-1">{error}</p>
+                    </div>
                   </div>
                 </div>
               ) : output ? (
-                <div className="whitespace-pre-wrap text-gray-900 leading-relaxed">
-                  {output}
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="whitespace-pre-wrap text-gray-900 leading-relaxed">
+                    {output}
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-64">
+                <div className="flex items-center justify-center h-full">
                   <p className="text-gray-500">{t('outputWillAppear')}</p>
                 </div>
               )}
