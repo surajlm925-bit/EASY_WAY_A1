@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { initializeDatabaseWithSeeding } = require('./database/db');
+const { optionalAuth } = require('./middleware/auth');
+const authRoutes = require('./routes/auth');
 const {
     getAllModules,
     createModule,
@@ -16,10 +18,16 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Add optional auth middleware to all routes
+app.use(optionalAuth);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
 });
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // API Routes for modules
 

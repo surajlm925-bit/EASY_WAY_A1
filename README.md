@@ -1,16 +1,19 @@
 # Easy Way A1 - AI Processing Platform
 
-A powerful, modular AI processing platform that enables users to create custom AI-powered tools with persistent data storage. Built with React, TypeScript, and Node.js, Easy Way A1 provides a seamless interface for AI content generation and processing.
+A powerful, modular AI processing platform with comprehensive authentication that enables users to create custom AI-powered tools with persistent data storage. Built with React, TypeScript, Node.js, and Supabase, Easy Way A1 provides a seamless interface for AI content generation and processing with secure user management.
 
 ## 🚀 Features
 
 ### Core Functionality
 
+- **Authentication System**: Secure user registration, login, and role-based access control
+- **User Management**: Admin dashboard for managing users and viewing analytics
 - **Bilingual Interface**: Full support for English and Kannada languages
 - **Modular AI Tools**: Create custom modules with specific prompts for different use cases
 - **Persistent Storage**: SQLite database for storing modules and configurations
 - **Real-time Processing**: Integration with Google Gemini AI for content generation
-- **Admin/User Modes**: Toggle between administrative and user interfaces
+- **Role-Based Access**: Admin and user roles with appropriate permissions
+- **Activity Tracking**: Comprehensive logging of module usage and analytics
 
 ### Current Modules Support
 
@@ -18,12 +21,15 @@ A powerful, modular AI processing platform that enables users to create custom A
 - Bilingual content management
 - Module CRUD operations (Create, Read, Update, Delete)
 - Error handling and validation
+- User activity tracking and analytics
 
 ## 🏗️ Architecture
 
 ### Frontend (React + TypeScript)
 
 - **Framework**: React 18 with TypeScript
+- **Authentication**: Supabase Auth with JWT tokens
+- **Routing**: React Router with protected routes
 - **Styling**: Tailwind CSS for responsive design
 - **State Management**: React hooks with centralized state
 - **Build Tool**: Vite for fast development and building
@@ -32,13 +38,37 @@ A powerful, modular AI processing platform that enables users to create custom A
 ### Backend (Node.js + Express)
 
 - **Runtime**: Node.js with Express.js framework
-- **Database**: SQLite3 for lightweight, file-based storage
+- **Database**: Supabase PostgreSQL for scalable data storage
+- **Authentication**: Supabase Auth integration
 - **API**: RESTful API with proper error handling
 - **CORS**: Cross-origin resource sharing enabled
 
 ### Database Schema
 
 ```sql
+-- User profiles (extends Supabase auth.users)
+user_profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  email TEXT,
+  full_name TEXT,
+  role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+
+-- Module usage tracking
+module_usage (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  module_name TEXT NOT NULL,
+  input_data JSONB,
+  output_data JSONB,
+  processing_time INTEGER,
+  status TEXT DEFAULT 'completed',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+
+-- Existing modules table
 modules (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   prompt TEXT NOT NULL,
@@ -59,6 +89,7 @@ modules (
 
 - Node.js (v16 or higher)
 - npm or yarn package manager
+- Supabase account and project
 
 ### Setup Instructions
 
@@ -83,21 +114,35 @@ modules (
    cd ..
    ```
 
-4. **Environment Configuration**
+4. **Supabase Setup**
+
+   a. Create a new Supabase project at [supabase.com](https://supabase.com)
+   
+   b. Run the authentication migration:
+   ```bash
+   # Copy the SQL from supabase/migrations/create_auth_tables.sql
+   # and run it in your Supabase SQL editor
+   ```
+
+5. **Environment Configuration**
 
    Create `.env` file in the root directory:
 
    ```env
    VITE_API_BASE_URL=http://localhost:3001
+    VITE_SUPABASE_URL=your_supabase_project_url
+    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
    Create `backend/.env` file:
 
    ```env
    PORT=3001
+    SUPABASE_URL=your_supabase_project_url
+    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    ```
 
-5. **Start the application**
+6. **Start the application**
 
    **Backend** (Terminal 1):
 
@@ -112,28 +157,54 @@ modules (
    npm run dev
    ```
 
-6. **Access the application**
+7. **Access the application**
    - Frontend: <http://localhost:5173>
    - Backend API: <http://localhost:3001>
+
+8. **Create Admin User**
+   
+   After registering your first user, you can promote them to admin by running this SQL in Supabase:
+   ```sql
+   UPDATE user_profiles SET role = 'admin' WHERE email = 'your-email@example.com';
+   ```
 
 ## 🔧 Usage
 
 ### Basic Workflow
 
-1. **Setup API Key**: Configure your Google Gemini API key in settings
-2. **Select Language**: Choose between English and Kannada interface
-3. **Choose Module**: Select from available AI modules or create new ones
-4. **Process Content**: Input your content and get AI-generated results
+1. **Register/Login**: Create an account or sign in to access the platform
+2. **Setup API Key**: Configure your Google Gemini API key in settings
+3. **Select Language**: Choose between English and Kannada interface
+4. **Choose Module**: Select from available AI modules or create new ones
+5. **Process Content**: Input your content and get AI-generated results
 
 ### Admin Mode Features
 
+- Access admin dashboard with user management
+- View platform analytics and usage statistics
 - Create new modules with custom prompts
 - Edit existing module configurations
 - Delete modules
-- Manage bilingual content for each module
+- Manage user roles and permissions
 
+### User Features
+
+- Personal profile management
+- View usage history and statistics
+- Access to all AI processing modules
+- Bilingual interface support
 ### API Endpoints
 
+#### Authentication Endpoints
+| Method | Endpoint                    | Description                    |
+| ------ | --------------------------- | ------------------------------ |
+| GET    | `/api/auth/users`          | Get all users (admin only)    |
+| PUT    | `/api/auth/users/:id/role` | Update user role (admin only) |
+| GET    | `/api/auth/usage`          | Get user's module usage        |
+| GET    | `/api/auth/usage/all`      | Get all usage (admin only)    |
+| POST   | `/api/auth/usage`          | Track module usage             |
+
+#### Module Endpoints
 | Method | Endpoint           | Description            |
 | ------ | ------------------ | ---------------------- |
 | GET    | `/api/modules`     | Fetch all modules      |
@@ -143,6 +214,16 @@ modules (
 | GET    | `/health`          | Health check endpoint  |
 
 ## 🧪 Testing
+
+### Authentication Tests
+
+```bash
+# Test user registration and login flows
+npm run test:auth
+
+# Test role-based access control
+npm run test:rbac
+```
 
 ### Backend Tests
 
@@ -165,11 +246,25 @@ npm run test  # Run frontend test suite
 EASY_WAY_A1/
 ├── src/                          # Frontend source code
 │   ├── components/              # React components
+│   │   ├── auth/               # Authentication components
+│   │   │   ├── LoginForm.tsx
+│   │   │   ├── RegisterForm.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── ForgotPasswordForm.tsx
+│   │   ├── admin/              # Admin components
+│   │   │   └── AdminDashboard.tsx
+│   │   ├── user/               # User components
+│   │   │   └── UserProfile.tsx
+│   ├── components/              # React components
 │   │   ├── modals/             # Modal components
 │   │   ├── Header.tsx          # Application header
 │   │   ├── Sidebar.tsx         # Module sidebar
 │   │   ├── MainContent.tsx     # Main content area
 │   │   └── ErrorToast.tsx      # Error notifications
+│   ├── contexts/               # React contexts
+│   │   └── AuthContext.tsx     # Authentication context
+│   ├── lib/                    # Library configurations
+│   │   └── supabase.ts         # Supabase client setup
 │   ├── services/               # API services
 │   │   ├── moduleApi.ts        # Module API client
 │   │   └── __tests__/          # Service tests
@@ -177,12 +272,21 @@ EASY_WAY_A1/
 │   ├── utils/                  # Utility functions
 │   └── App.tsx                 # Main application component
 ├── backend/                     # Backend source code
+│   ├── lib/                    # Backend libraries
+│   │   └── supabase.js         # Supabase server client
+│   ├── middleware/             # Express middleware
+│   │   └── auth.js             # Authentication middleware
+│   ├── routes/                 # API routes
+│   │   └── auth.js             # Authentication routes
 │   ├── database/               # Database layer
 │   │   ├── db.js              # Database connection
 │   │   ├── moduleRepository.js # Data access layer
 │   │   └── modules.db         # SQLite database file
 │   ├── server.js              # Express server
 │   └── test-*.js              # Backend tests
+├── supabase/                   # Supabase configuration
+│   └── migrations/             # Database migrations
+│       └── create_auth_tables.sql
 ├── .kiro/                      # Kiro IDE configuration
 │   └── specs/                 # Project specifications
 └── package.json               # Project dependencies
@@ -192,6 +296,13 @@ EASY_WAY_A1/
 
 ### ✅ Completed Features
 
+- [x] Complete authentication system with Supabase
+- [x] User registration and login
+- [x] Role-based access control (admin/user)
+- [x] Protected routes and middleware
+- [x] User profile management
+- [x] Admin dashboard with user management
+- [x] Module usage tracking and analytics
 - [x] Database infrastructure with SQLite
 - [x] Module repository layer with CRUD operations
 - [x] RESTful API endpoints with error handling
@@ -204,16 +315,17 @@ EASY_WAY_A1/
 
 ### 🚧 In Progress
 
-- [ ] App component API integration (partially complete)
-- [ ] Loading and error UI components
-- [ ] Database seeding with default modules
-- [ ] End-to-end testing
+- [ ] Email verification flow
+- [ ] Password reset functionality
+- [ ] Advanced analytics dashboard
+- [ ] User activity notifications
 
 ### 📋 Planned Features
 
-- Image analysis capabilities
-- Advanced content generation templates
-- User authentication and authorization
+- Two-factor authentication (2FA)
+- Social login providers (Google, GitHub)
+- API rate limiting per user
+- Advanced user permissions system
 - Export/import functionality for modules
 - Performance optimization and caching
 
@@ -257,6 +369,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ### Frontend
 
 - React 18.3.1
+- React Router DOM 6.x
+- @supabase/supabase-js 2.x
+- React 18.3.1
 - TypeScript 5.5.3
 - Tailwind CSS 3.4.1
 - Vite 7.0.6
@@ -264,6 +379,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ### Backend
 
+- @supabase/supabase-js 2.x
 - Express 4.18.2
 - SQLite3 5.1.6
 - CORS 2.8.5
@@ -271,7 +387,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Support
 
-For support and questions, please open an issue in the repository or contact the development team.
+For support and questions:
+- Open an issue in the repository
+- Check the [Supabase documentation](https://supabase.com/docs) for auth-related questions
+- Contact the development team
 
 ---
 
@@ -286,6 +405,9 @@ cd EASY_WAY_A1
 npm install
 cd backend && npm install && cd ..
 
+# Set up Supabase (create project and run migrations)
+# Copy environment variables from Supabase dashboard
+
 # Start the application
 # Terminal 1 - Backend
 cd backend && npm start
@@ -294,6 +416,6 @@ cd backend && npm start
 npm run dev
 ```
 
-**Status**: Production Ready - Full-featured AI processing platform  
+**Status**: Production Ready - Full-featured AI processing platform with authentication  
 **Version**: 1.0.0  
 **Last Updated**: January 2025

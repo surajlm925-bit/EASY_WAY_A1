@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Module, AppState, Language } from './types';
 import { processWithGemini } from './utils/geminiApi';
 import {
@@ -10,6 +11,13 @@ import {
   CreateModuleRequest,
   UpdateModuleRequest
 } from './services/moduleApi';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import LoginForm from './components/auth/LoginForm';
+import RegisterForm from './components/auth/RegisterForm';
+import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
+import UserProfile from './components/user/UserProfile';
+import AdminDashboard from './components/admin/AdminDashboard';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
@@ -19,7 +27,8 @@ import SettingsModal from './components/modals/SettingsModal';
 import ErrorToast from './components/ErrorToast';
 import SuccessToast from './components/SuccessToast';
 
-function App() {
+function MainApp() {
+  const { user, profile, isAdmin, trackModuleUsage } = useAuth();
   const [state, setState] = useState<AppState>({
     modules: [],
     selectedModule: null,
@@ -83,7 +92,10 @@ function App() {
   }, [updateState]);
 
   const handleToggleAdminMode = () => {
-    updateState({ isAdminMode: !state.isAdminMode });
+    // Only allow admin mode if user is actually an admin
+    if (isAdmin) {
+      updateState({ isAdminMode: !state.isAdminMode });
+    }
   };
 
   const handleLanguageChange = (language: Language) => {
@@ -183,6 +195,7 @@ function App() {
   const handleProcess = async () => {
     if (!state.selectedModule || !state.input.trim()) return;
 
+    const startTime = Date.now();
     updateState({ isLoading: true, error: null, output: '' });
 
     try {
@@ -193,12 +206,38 @@ function App() {
       );
 
       if (result.success && result.output) {
+        const processingTime = Date.now() - startTime;
+        
+        // Track module usage
+        if (user && state.selectedModule) {
+          await trackModuleUsage({
+            module_name: state.selectedModule.en.name,
+            input_data: { input: state.input },
+            output_data: { output: result.output },
+            processing_time: processingTime,
+            status: 'completed'
+          });
+        }
+
         updateState({
           output: result.output,
           isLoading: false,
           error: null
         });
       } else {
+        const processingTime = Date.now() - startTime;
+        
+        // Track failed usage
+        if (user && state.selectedModule) {
+          await trackModuleUsage({
+            module_name: state.selectedModule.en.name,
+            input_data: { input: state.input },
+            output_data: { error: result.error },
+            processing_time: processingTime,
+            status: 'failed'
+          });
+        }
+
         updateState({
           error: result.error || 'Processing failed',
           isLoading: false,
@@ -206,6 +245,19 @@ function App() {
         });
       }
     } catch (error) {
+      const processingTime = Date.now() - startTime;
+      
+      // Track failed usage
+      if (user && state.selectedModule) {
+        await trackModuleUsage({
+          module_name: state.selectedModule.en.name,
+          input_data: { input: state.input },
+          output_data: { error: 'An unexpected error occurred' },
+          processing_time: processingTime,
+          status: 'failed'
+        });
+      }
+
       updateState({
         error: 'An unexpected error occurred',
         isLoading: false,
@@ -222,8 +274,10 @@ function App() {
     <div className="h-screen flex flex-col bg-gray-50">
       <Header
         isAdminMode={state.isAdminMode}
-        onToggleAdminMode={handleToggleAdminMode}
+        onToggleAdminMode={isAdmin ? handleToggleAdminMode : undefined}
         onOpenSettings={() => setModals({ ...modals, settings: true })}
+        user={user}
+        profile={profile}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -294,6 +348,43 @@ function App() {
         onClose={() => setSuccessMessage(null)}
       />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+          
+          {/* Protected routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <MainApp />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/admin" element={
+            <ProtectedRoute requireAdmin>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
