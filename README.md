@@ -126,20 +126,22 @@ modules (
 
 5. **Environment Configuration**
 
-   Create `.env` file in the root directory:
+   **IMPORTANT: For Bolt Environment**
+   
+   Update the `.env` file in the root directory with your actual Supabase credentials:
 
    ```env
-    VITE_SUPABASE_URL=your_supabase_project_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-    VITE_API_BASE_URL=http://localhost:3001
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your_actual_anon_key
+   VITE_API_BASE_URL=http://localhost:3001
    ```
 
-   Create `backend/.env` file:
+   Update `backend/.env` file with your actual Supabase credentials:
 
    ```env
    PORT=3001
-    SUPABASE_URL=your_supabase_project_url
-    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your_actual_service_role_key
    ```
 
 6. **Database Setup**
