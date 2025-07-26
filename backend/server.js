@@ -1,5 +1,15 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+
+// Load environment variables
+try {
+  require('dotenv').config({ path: path.join(__dirname, '.env') });
+  require('dotenv').config({ path: path.join(__dirname, '../.env') });
+} catch (error) {
+  console.log('dotenv loading failed, using process.env directly');
+}
+
 const { initializeDatabaseWithSeeding } = require('./database/db');
 const { optionalAuth } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
@@ -12,7 +22,10 @@ const {
 } = require('./database/moduleRepository');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || process.env.VITE_PORT || 3001;
+
+console.log('🚀 Starting Easy Way A1 Backend Server...');
+console.log('Port:', PORT);
 
 // Middleware
 app.use(cors());
@@ -23,7 +36,12 @@ app.use(optionalAuth);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Server is running' });
+    res.json({ 
+        status: 'OK', 
+        message: 'Easy Way A1 Backend Server is running',
+        timestamp: new Date().toISOString(),
+        port: PORT
+    });
 });
 
 // Auth routes

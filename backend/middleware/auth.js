@@ -1,10 +1,33 @@
-const { supabase } = require('../lib/supabase');
+let supabase;
+try {
+  const supabaseLib = require('../lib/supabase');
+  supabase = supabaseLib.supabase;
+} catch (error) {
+  console.error('Failed to load Supabase client:', error.message);
+  // Create mock supabase for development
+  supabase = {
+    auth: {
+      getUser: () => Promise.resolve({ data: { user: null }, error: { message: 'Supabase not configured' } })
+    },
+    from: () => ({
+      select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }),
+      upsert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }) })
+    })
+  };
+}
 
 /**
  * Middleware to verify JWT token and extract user information
  */
 const authenticateUser = async (req, res, next) => {
   try {
+    if (!supabase || !supabase.auth) {
+      return res.status(500).json({
+        success: false,
+        error: 'Authentication service not available - Supabase not configured'
+      });
+    }
+
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
