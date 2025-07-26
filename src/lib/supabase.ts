@@ -147,31 +147,37 @@ export const authHelpers = {
     if (!user) return null;
 
     // Check if profile exists
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile, error: fetchError } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', user.id)
       .single();
 
-    if (existingProfile) {
+    if (existingProfile && !fetchError) {
       return existingProfile;
     }
 
     // Create profile if it doesn't exist
     const { data: newProfile, error } = await supabase
       .from('user_profiles')
-      .insert([{
+      .upsert([{
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name || '',
         role: 'user'
-      }])
+      }], { onConflict: 'id' })
       .select()
       .single();
 
     if (error) {
       console.error('Error creating user profile:', error);
-      return null;
+      // If insert fails, try to fetch existing profile again
+      const { data: retryProfile } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      return retryProfile;
     }
 
     return newProfile;

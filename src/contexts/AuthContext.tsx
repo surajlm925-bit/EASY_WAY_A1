@@ -69,14 +69,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserProfile = async (userId: string) => {
     try {
-      // First get the current user to ensure we have all data
-      const { user: currentUser } = await authHelpers.getCurrentUser();
-      
-      // Ensure user profile exists (create if needed)
-      const profile = await authHelpers.ensureUserProfile(currentUser);
-      
+      const { profile, error } = await authHelpers.getUserProfile(userId);
       if (error) {
         console.error('Error loading user profile:', error);
+        // Try to create profile if it doesn't exist
+        const { user } = await authHelpers.getCurrentUser();
+        if (user) {
+          const createdProfile = await authHelpers.ensureUserProfile(user);
+          setProfile(createdProfile);
+        }
       } else {
         setProfile(profile);
       }

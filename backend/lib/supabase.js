@@ -19,12 +19,17 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 // Test the connection
-supabase.from('user_profiles').select('count', { count: 'exact', head: true })
+supabase.from('user_profiles').select('id', { count: 'exact', head: true })
   .then(({ error }) => {
     if (error) {
-      console.error('Supabase connection test failed:', error.message);
+      console.error('❌ Supabase connection test failed:', error.message);
+      console.error('Make sure user_profiles table exists and RLS policies are set up');
     } else {
       console.log('✅ Supabase backend connection successful');
     }
+  })
+  .catch((err) => {
+    console.error('❌ Supabase connection error:', err.message);
   });
+
 module.exports = { supabase };

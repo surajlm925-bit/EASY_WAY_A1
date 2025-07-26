@@ -34,15 +34,31 @@ const authenticateUser = async (req, res, next) => {
       .single();
 
     if (profileError) {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to fetch user profile'
-      });
+      console.error('Profile fetch error:', profileError);
+      // Try to create profile if it doesn't exist
+      const { data: newProfile, error: createError } = await supabase
+        .from('user_profiles')
+        .upsert([{
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || '',
+          role: 'user'
+        }], { onConflict: 'id' })
+        .select()
+        .single();
+      
+      if (createError) {
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to create user profile'
+        });
+      }
+      req.profile = newProfile;
+    } else {
+      req.profile = profile;
     }
 
-    // Attach user and profile to request object
     req.user = user;
-    req.profile = profile;
 
     next();
   } catch (error) {
